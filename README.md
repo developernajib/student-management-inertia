@@ -25,7 +25,7 @@ Before you begin, ensure you have met the following requirements:
 git clone https://github.com/developernajib/student-management-inertia.git
 ```
 ```
-cd boston-new
+cd student-management-inertia
 ```
 
 ### 2. Install PHP dependencies

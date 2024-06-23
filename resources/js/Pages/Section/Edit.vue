@@ -1,0 +1,132 @@
+<script setup>
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
+import { Head, Link, useForm, usePage } from "@inertiajs/vue3";
+import InputError from "@/Components/InputError.vue";
+import { useToast } from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+defineProps({
+    section: {
+        type: Object,
+    },
+});
+
+const $toast = useToast();
+const section = usePage().props.section;
+
+const form = useForm({
+    name: section.data.name,
+    class_id: section.data.class_id,
+});
+
+const submit = async () => {
+    try {
+        await form.put(route("sections.update", section.data.id), {
+            preserveScroll: true,
+        });
+        $toast.open({
+            message: "Section updated successfully",
+            type: "success",
+        });
+    } catch (error) {
+        $toast.open({
+            message: "Got error while updating section, please try again !",
+            type: 'error',
+            position: 'top-right',
+        });
+    }
+};
+
+
+const deleteForm = useForm({});
+const deleteSection = async () => {
+    if (confirm("Are you sure you want to delete this section, this section related students will also be deleted?")) {
+        try {
+            await deleteForm.delete(route("sections.destroy", section.data.id));
+            route('sections.index')
+            $toast.open({
+                message: "Section deleted successfully",
+                type: 'success',
+                position: 'top-right',
+            });
+        } catch (error) {
+            $toast.open({
+                message: "Got error while deleting section, please try again !",
+                type: 'error',
+                position: 'top-right',
+            });
+        }
+    }
+};
+</script>
+
+<template>
+
+    <Head title="Sections" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Sections
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">
+                Use this form to update a section.
+            </p>
+        </template>
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-12 lg:gap-x-5">
+                <div class="space-y-6 sm:px-6 lg:px-0 lg:col-span-12">
+                    <div class="flex justify-end">
+                        <button @click="deleteSection()" class="bg-indigo-600 border border-transparent rounded-md py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Delete
+                        </button>
+                    </div>
+                    <form @submit.prevent="submit">
+                        <div class="shadow sm:rounded-md sm:overflow-hidden">
+                            <div class="bg-white py-6 px-4 space-y-6 sm:p-6">
+                                <div class="grid grid-cols-6 gap-6">
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="class_id"
+                                            class="block text-sm font-medium text-gray-700">Class</label>
+                                        <select v-model="form.class_id" id="class_id" disabled
+                                            class="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{
+                                                'text-red-900 focus:ring-red-500 focus:border-red-500 border-red-300':
+                                                    form.errors.class_id,
+                                            }">
+                                            <option :value="section.data.class_id">
+                                                {{ section.data.class.name }}
+                                            </option>
+                                        </select>
+                                        <InputError class="mt-2" :message="form.errors.class_id" />
+                                    </div>
+                                    <div class="col-span-6 sm:col-span-3">
+                                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                                        <input v-model="form.name" type="text" id="name"
+                                            class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            :class="{
+                                                'text-red-900 focus:ring-red-500 focus:border-red-500 border-red-300':
+                                                    form.errors.name,
+                                            }" />
+                                        <InputError class="mt-2" :message="form.errors.name" />
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                                <Link :href="route('sections.index')"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-4">
+                                    Cancel
+                                </Link>
+                                <button type="submit"
+                                    class="bg-indigo-600 border border-transparent rounded-md shadow-sm py-2 px-4 inline-flex justify-center text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Update
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>
